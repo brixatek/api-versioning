@@ -356,3 +356,7 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Custom demo files
+API_Versioning_Presentation.html
+run-demo.bat
