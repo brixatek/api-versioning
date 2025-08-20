@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Versioning Best Practices</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; }
+        .slide { page-break-after: always; margin-bottom: 50px; }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; margin-top: 30px; }
+        .code { background: #f8f9fa; padding: 15px; border-left: 4px solid #007acc; font-family: 'Courier New', monospace; }
+        .pros { color: #27ae60; }
+        .cons { color: #e74c3c; }
+        .best-practice { background: #e8f5e8; padding: 10px; border-left: 4px solid #27ae60; }
+        .warning { background: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        
+        /* Graphical Elements */
+        .diagram { display: flex; justify-content: space-around; align-items: center; margin: 30px 0; }
+        .box { padding: 20px; border: 2px solid #3498db; border-radius: 10px; text-align: center; min-width: 120px; background: #ecf0f1; }
+        .deprecated-box { border-color: #e74c3c; background: #fadbd8; }
+        .active-box { border-color: #27ae60; background: #d5f4e6; }
+        .arrow { font-size: 24px; color: #3498db; margin: 0 10px; }
+        .timeline { display: flex; align-items: center; margin: 20px 0; }
+        .timeline-item { flex: 1; text-align: center; position: relative; }
+        .timeline-dot { width: 20px; height: 20px; border-radius: 50%; margin: 0 auto 10px; }
+        .timeline-line { height: 3px; background: #bdc3c7; position: absolute; top: 10px; left: 50%; right: -50%; z-index: -1; }
+        .phase-intro { background: #3498db; }
+        .phase-adoption { background: #f39c12; }
+        .phase-deprecation { background: #e74c3c; }
+        .phase-retirement { background: #95a5a6; }
+        .flow-chart { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .flow-row { display: flex; justify-content: center; gap: 30px; align-items: center; }
+        .decision { background: #f39c12; border-radius: 50%; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+        .process { background: #3498db; color: white; padding: 15px; border-radius: 5px; min-width: 150px; text-align: center; }
+        .terminator { background: #27ae60; color: white; padding: 15px; border-radius: 25px; min-width: 150px; text-align: center; }
+        .version-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 20px 0; }
+        .version-card { border: 2px solid #bdc3c7; border-radius: 10px; padding: 20px; }
+        .v1-card { border-color: #e74c3c; background: #fadbd8; }
+        .v2-card { border-color: #27ae60; background: #d5f4e6; }
+    </style>
+</head>
+<body>
+
+<div class="slide">
+    <h1>API Versioning Best Practices</h1>
+    <h2>Knowledge Sharing Session</h2>
+    <ul>
+        <li><strong>Topic:</strong> API Versioning Strategies in .NET Core</li>
+        <li><strong>Goal:</strong> Learn when, why, and how to version APIs</li>
+        <li><strong>Demo:</strong> Practical implementation examples</li>
+        <li><strong>Outcome:</strong> Apply best practices in your projects</li>
+    </ul>
+</div>
+
+<div class="slide">
+    <h1>Why API Versioning?</h1>
+    <h2>The Problem</h2>
+    <ul>
+        <li>APIs evolve over time</li>
+        <li>Breaking changes affect existing clients</li>
+        <li>Need to support multiple client versions</li>
+        <li>Gradual migration vs. big bang updates</li>
+    </ul>
+    
+    <h2>The Solution</h2>
+    <ul>
+        <li>Maintain backward compatibility</li>
+        <li>Allow parallel API versions</li>
+        <li>Controlled deprecation process</li>
+        <li>Clear communication with consumers</li>
+    </ul>
+</div>
+
+<div class="slide">
+    <h1>When to Version Your API</h1>
+    
+    <div class="flow-chart">
+        <div class="decision">API Change?</div>
+        <div class="arrow" style="transform: rotate(90deg);">↓</div>
+        <div class="flow-row">
+            <div class="flow-row" style="flex-direction: column;">
+                <div class="process" style="background: #27ae60;">✅ Breaking Changes</div>
+                <ul style="text-align: left; font-size: 14px;">
+                    <li>Remove fields/endpoints</li>
+                    <li>Change field types</li>
+                    <li>Modify required params</li>
+                    <li>Change response structure</li>
+                    <li>Alter business logic</li>
+                </ul>
+                <div class="terminator">CREATE NEW VERSION</div>
+            </div>
+            <div class="flow-row" style="flex-direction: column;">
+                <div class="process" style="background: #e74c3c;">❌ Non-Breaking Changes</div>
+                <ul style="text-align: left; font-size: 14px;">
+                    <li>Add optional fields</li>
+                    <li>Bug fixes</li>
+                    <li>Performance improvements</li>
+                    <li>Add optional endpoints</li>
+                    <li>Internal refactoring</li>
+                </ul>
+                <div class="terminator" style="background: #95a5a6;">UPDATE EXISTING</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="slide">
+    <h1>API Versioning Strategies</h1>
+    
+    <div class="diagram">
+        <div class="box">
+            <strong>URL Path</strong><br>
+            /api/v1/products<br>
+            <span style="color: #27ae60;">✅ Recommended</span>
+        </div>
+        <div class="box">
+            <strong>Query Parameter</strong><br>
+            /api/products?version=1<br>
+            <span style="color: #f39c12;">⚠️ Simple</span>
+        </div>
+        <div class="box">
+            <strong>Header</strong><br>
+            X-API-Version: 1.0<br>
+            <span style="color: #3498db;">ℹ️ Hidden</span>
+        </div>
+        <div class="box">
+            <strong>Content Type</strong><br>
+            application/vnd.api.v1+json<br>
+            <span style="color: #e74c3c;">❌ Complex</span>
+        </div>
+    </div>
+    
+    <table>
+        <tr>
+            <th>Strategy</th>
+            <th>Example</th>
+            <th>Pros</th>
+            <th>Cons</th>
+        </tr>
+        <tr>
+            <td><strong>URL Path</strong></td>
+            <td>/api/v1/products</td>
+            <td>Clear, Cacheable, RESTful</td>
+            <td>URL proliferation</td>
+        </tr>
+        <tr>
+            <td><strong>Query Parameter</strong></td>
+            <td>/api/products?version=1</td>
+            <td>Simple, Optional</td>
+            <td>Easy to forget, Cache issues</td>
+        </tr>
+        <tr>
+            <td><strong>Header</strong></td>
+            <td>X-API-Version: 1.0</td>
+            <td>Clean URLs, Flexible</td>
+            <td>Hidden, Testing complexity</td>
+        </tr>
+        <tr>
+            <td><strong>Content Type</strong></td>
+            <td>Accept: application/vnd.api.v1+json</td>
+            <td>HTTP compliant</td>
+            <td>Complex, Tool support</td>
+        </tr>
+    </table>
+</div>
+
+<div class="slide">
+    <h1>URL Path Versioning (Recommended)</h1>
+    
+    <div class="best-practice">
+        <strong>Best Practice:</strong> Use URL path versioning for public APIs
+    </div>
+    
+    <div class="code">
+GET /api/v1.0/products
+GET /api/v2.0/products
+POST /api/v1.0/products
+    </div>
+    
+    <h2>Advantages:</h2>
+    <ul class="pros">
+        <li>✅ Explicit and visible</li>
+        <li>✅ Easy to test and debug</li>
+        <li>✅ Works with all HTTP clients</li>
+        <li>✅ Cacheable by proxies</li>
+        <li>✅ RESTful approach</li>
+    </ul>
+    
+    <h2>Implementation in .NET Core:</h2>
+    <div class="code">
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
+public class ProductsController : ControllerBase
+    </div>
+</div>
+
+<div class="slide">
+    <h1>Header-Based Versioning</h1>
+    
+    <div class="code">
+GET /api/products
+X-API-Version: 2.0
+    </div>
+    
+    <h2>When to Use:</h2>
+    <ul>
+        <li>Internal APIs</li>
+        <li>When URL cleanliness is priority</li>
+        <li>Advanced client applications</li>
+    </ul>
+    
+    <h2>Implementation:</h2>
+    <div class="code">
+[HttpGet]
+[MapToApiVersion("1.0")]
+public ActionResult GetProductsV1() { }
+
+[HttpGet]
+[MapToApiVersion("2.0")]
+public ActionResult GetProductsV2() { }
+    </div>
+</div>
+
+<div class="slide">
+    <h1>Step-by-Step Implementation</h1>
+    
+    <h2>1. Create New .NET Core Web API Project</h2>
+    <div class="code">
+dotnet new webapi -n ApiVersioningDemo
+cd ApiVersioningDemo
+    </div>
+    
+    <h2>2. Install Required NuGet Packages</h2>
+    <div class="code">
+dotnet add package Microsoft.AspNetCore.Mvc.Versioning --version 5.1.0
+dotnet add package Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer --version 5.1.0
+dotnet add package Swashbuckle.AspNetCore --version 6.5.0
+    </div>
+    
+    <h2>3. Restore Packages</h2>
+    <div class="code">
+dotnet restore
+    </div>
+</div>
+
+<div class="slide">
+    <h1>Configuration Setup</h1>
+    
+    <h2>1. Configure API Versioning in Program.cs</h2>
+    <div class="code">
+builder.Services.AddApiVersioning(opt =>
+{
+    opt.DefaultApiVersion = new ApiVersion(1, 0);
+    opt.AssumeDefaultVersionWhenUnspecified = true;
+    opt.ApiVersionReader = ApiVersionReader.Combine(
+        new UrlSegmentApiVersionReader(),
+        new HeaderApiVersionReader("X-Version"),
+        new QueryStringApiVersionReader("version")
+    );
+});
+    </div>
+    
+    <h2>2. Add API Explorer for Swagger</h2>
+    <div class="code">
+builder.Services.AddVersionedApiExplorer(setup =>
+{
+    setup.GroupNameFormat = "'v'VVV";
+    setup.SubstituteApiVersionInUrl = true;
+});
+    </div>
+</div>
+
+<div class="slide">
+    <h1>Controller Implementation</h1>
+    
+    <h2>1. Create Models (Models/Product.cs)</h2>
+    <div class="code">
+public class Product
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public decimal Price { get; set; }
+    public string Category { get; set; } = string.Empty;
+}
+    </div>
+    
+    <h2>2. Create V1 Controller</h2>
+    <div class="code">
+[ApiController]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
+public class ProductsController : ControllerBase
+{
+    [HttpGet]
+    public ActionResult&lt;IEnumerable&lt;Product&gt;&gt; GetProducts()
+    {
+        // Implementation
+    }
+}
+    </div>
+</div>
+
+<div class="slide">
+    <h1>Demo: Products API Evolution</h1>
+    
+    <div class="version-comparison">
+        <div class="version-card v1-card">
+            <h2>⚠️ Version 1.0 - DEPRECATED</h2>
+            <div class="code">
+{
+  "_deprecation": {
+    "warning": "⚠️ Deprecated",
+    "sunsetDate": "2024-12-31"
+  },
+  "data": {
+    "id": 1,
+    "name": "Laptop",
+    "price": 999.99,
+    "category": "Electronics"
+  }
+}
+            </div>
+            <p><strong>Features:</strong> Basic CRUD operations</p>
+        </div>
+        
+        <div class="version-card v2-card">
+            <h2>✅ Version 2.0 - CURRENT</h2>
+            <div class="code">
+{
+  "id": 1,
+  "name": "Laptop",
+  "price": 999.99,
+  "category": "Electronics",
+  "description": "High-performance laptop",
+  "createdDate": "2024-01-15T10:30:00Z",
+  "isActive": true
+}
+            </div>
+            <p><strong>Features:</strong> Enhanced fields + Status management</p>
+        </div>
+    </div>
+    
+    <div class="diagram">
+        <div class="deprecated-box">V1 API<br>4 fields</div>
+        <div class="arrow">🔄 Migrate</div>
+        <div class="active-box">V2 API<br>7 fields</div>
+    </div>
+</div>
+
+<div class="slide">
+    <h1>Versioning Best Practices</h1>
+    
+    <div class="best-practice">
+        <h2>✅ Do's</h2>
+        <ul>
+            <li>Use semantic versioning (1.0, 1.1, 2.0)</li>
+            <li>Document version differences clearly</li>
+            <li>Provide migration guides</li>
+            <li>Set deprecation timelines</li>
+            <li>Monitor version usage</li>
+            <li>Default to latest stable version</li>
+        </ul>
+    </div>
+    
+    <div class="warning">
+        <h2>❌ Don'ts</h2>
+        <ul>
+            <li>Don't version every small change</li>
+            <li>Don't support too many versions</li>
+            <li>Don't break existing versions</li>
+            <li>Don't version without communication</li>
+            <li>Don't forget to test all versions</li>
+        </ul>
+    </div>
+</div>
+
+<div class="slide">
+    <h1>Version Lifecycle Management</h1>
+    
+    <div class="timeline">
+        <div class="timeline-item">
+            <div class="timeline-dot phase-intro"></div>
+            <div class="timeline-line"></div>
+            <h3>Introduction</h3>
+            <ul style="text-align: left; font-size: 14px;">
+                <li>Release V2 alongside V1</li>
+                <li>Documentation</li>
+                <li>Migration examples</li>
+            </ul>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-dot phase-adoption"></div>
+            <div class="timeline-line"></div>
+            <h3>Adoption</h3>
+            <ul style="text-align: left; font-size: 14px;">
+                <li>Monitor usage</li>
+                <li>Gather feedback</li>
+                <li>Support both versions</li>
+            </ul>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-dot phase-deprecation"></div>
+            <div class="timeline-line"></div>
+            <h3>Deprecation</h3>
+            <ul style="text-align: left; font-size: 14px;">
+                <li>Announce timeline</li>
+                <li>Add headers</li>
+                <li>Migration support</li>
+            </ul>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-dot phase-retirement"></div>
+            <h3>Retirement</h3>
+            <ul style="text-align: left; font-size: 14px;">
+                <li>Remove old version</li>
+                <li>HTTP 410 Gone</li>
+                <li>Clear communication</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="diagram" style="margin-top: 40px;">
+        <div class="active-box">V1 Active</div>
+        <div class="arrow">→</div>
+        <div class="active-box">V1 + V2 Active</div>
+        <div class="arrow">→</div>
+        <div class="deprecated-box">V1 Deprecated<br>V2 Active</div>
+        <div class="arrow">→</div>
+        <div class="box" style="background: #bdc3c7;">V1 Removed<br>V2 Active</div>
+    </div>
+</div>
+
+<div class="slide">
+    <h1>API Deprecation Implementation</h1>
+    
+    <h2>1. Deprecation Headers (RFC 8594)</h2>
+    <div class="code">
+Deprecation: true
+Deprecation-Date: Sat, 01 Jun 2024 00:00:00 GMT
+Sunset: Tue, 31 Dec 2024 23:59:59 GMT
+Link: &lt;/api/v2.0/products&gt;; rel="successor-version"
+    </div>
+    
+    <h2>2. Custom Deprecation Attribute</h2>
+    <div class="code">
+[Deprecated(DeprecationDate = "2024-06-01", 
+           SunsetDate = "2024-12-31", 
+           AlternativeVersion = "2.0")]
+public class ProductsV1Controller : ControllerBase
+    </div>
+    
+    <h2>3. API Version Deprecation</h2>
+    <div class="code">
+[ApiVersion("1.0", Deprecated = true)]
+    </div>
+</div>
+
+<div class="slide">
+    <h1>Deprecation Strategies</h1>
+    
+    <div class="diagram">
+        <div class="box" style="background: #fff3cd; border-color: #ffc107;">
+            <strong>🟡 Soft Deprecation</strong><br>
+            Headers + Warnings<br>
+            <small>Long transition period</small>
+        </div>
+        <div class="arrow">→</div>
+        <div class="box" style="background: #f8d7da; border-color: #dc3545;">
+            <strong>🔴 Hard Deprecation</strong><br>
+            HTTP 410 Gone<br>
+            <small>Immediate removal</small>
+        </div>
+    </div>
+    
+    <div class="flow-chart" style="margin-top: 30px;">
+        <div class="process">API Needs Deprecation</div>
+        <div class="arrow" style="transform: rotate(90deg);">↓</div>
+        <div class="flow-row">
+            <div class="flow-row" style="flex-direction: column; align-items: center;">
+                <div class="decision" style="background: #f39c12; width: 80px; height: 80px; font-size: 12px;">Urgent?</div>
+                <div class="arrow" style="transform: rotate(90deg);">↓</div>
+                <div class="terminator" style="background: #e74c3c;">Hard Deprecation<br>HTTP 410</div>
+            </div>
+            <div class="flow-row" style="flex-direction: column; align-items: center;">
+                <div class="decision" style="background: #27ae60; width: 80px; height: 80px; font-size: 12px;">Gradual?</div>
+                <div class="arrow" style="transform: rotate(90deg);">↓</div>
+                <div class="terminator" style="background: #f39c12;">Soft Deprecation<br>Headers + Warnings</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="best-practice">
+        <strong>Best Practice:</strong> Always provide clear migration paths and sufficient notice period
+    </div>
+</div>
+
+<div class="slide">
+    <h1>Making Deprecation Visible to Users</h1>
+    
+    <div class="diagram">
+        <div class="box" style="background: #e8f4fd; border-color: #007bff;">
+            <strong>📱 Client Request</strong><br>
+            GET /api/v1.0/products
+        </div>
+        <div class="arrow">→</div>
+        <div class="box deprecated-box">
+            <strong>⚠️ Server Response</strong><br>
+            + Deprecation Headers<br>
+            + Warning in Body
+        </div>
+    </div>
+    
+    <h2>Multi-Layer Visibility Strategy</h2>
+    <div class="flow-chart">
+        <div class="flow-row">
+            <div class="process" style="background: #dc3545;">🚨 Response Body<br>_deprecation object</div>
+            <div class="process" style="background: #fd7e14;">📜 Swagger UI<br>⚠️ Warning icons</div>
+            <div class="process" style="background: #6f42c1;">📊 HTTP Headers<br>RFC 8594 compliant</div>
+            <div class="process" style="background: #20c997;">📝 Console Logs<br>Real-time alerts</div>
+        </div>
+    </div>
+    
+    <div class="version-comparison">
+        <div class="version-card deprecated-box">
+            <h3>⚠️ Deprecated Response</h3>
+            <div class="code" style="font-size: 12px;">
+{
+  "_deprecation": {
+    "warning": "⚠️ Deprecated",
+    "sunsetDate": "2024-12-31",
+    "migration": "/api/v2.0/products"
+  },
+  "data": [...]
+}
+            </div>
+        </div>
+        <div class="version-card active-box">
+            <h3>✅ Current Response</h3>
+            <div class="code" style="font-size: 12px;">
+{
+  "id": 1,
+  "name": "Laptop",
+  "price": 999.99,
+  "description": "Gaming laptop",
+  "isActive": true
+}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="slide">
+    <h1>Deprecation Monitoring</h1>
+    
+    <h2>1. Usage Tracking Middleware</h2>
+    <div class="code">
+public class DeprecationMiddleware
+{
+    public async Task InvokeAsync(HttpContext context)
+    {
+        await _next(context);
+        
+        if (context.Response.Headers.ContainsKey("Deprecation"))
+        {
+            _logger.LogWarning("⚠️ DEPRECATED API ACCESSED: {Endpoint}", 
+                context.Request.Path);
+            Console.WriteLine($"⚠️ DEPRECATED API: {endpoint}");
+        }
+    }
+}
+    </div>
+    
+    <h2>2. Metrics to Track</h2>
+    <ul>
+        <li>Usage frequency per deprecated endpoint</li>
+        <li>Client identification (User-Agent, API keys)</li>
+        <li>Geographic distribution</li>
+        <li>Error rates and response times</li>
+    </ul>
+</div>
+
+<div class="slide">
+    <h1>Testing Versioned APIs</h1>
+    
+    <h2>Test Strategy</h2>
+    <ul>
+        <li>Test all supported versions</li>
+        <li>Automated regression tests</li>
+        <li>Contract testing</li>
+        <li>Performance testing per version</li>
+    </ul>
+    
+    <h2>Example Test Cases</h2>
+    <div class="code">
+// Test V1 endpoint
+GET /api/v1.0/products
+Expected: Basic product fields only
+
+// Test V2 endpoint  
+GET /api/v2.0/products
+Expected: Enhanced product fields
+
+// Test default version
+GET /api/products
+Expected: Latest stable version response
+    </div>
+</div>
+
+<div class="slide">
+    <h1>Common Pitfalls & Solutions</h1>
+    
+    <table>
+        <tr>
+            <th>Pitfall</th>
+            <th>Impact</th>
+            <th>Solution</th>
+        </tr>
+        <tr>
+            <td>Version Sprawl</td>
+            <td>Maintenance nightmare</td>
+            <td>Limit supported versions (2-3 max)</td>
+        </tr>
+        <tr>
+            <td>Breaking Changes in Minor Versions</td>
+            <td>Client applications break</td>
+            <td>Follow semantic versioning strictly</td>
+        </tr>
+        <tr>
+            <td>No Migration Path</td>
+            <td>Stuck clients</td>
+            <td>Provide clear migration guides</td>
+        </tr>
+        <tr>
+            <td>Inconsistent Versioning</td>
+            <td>Developer confusion</td>
+            <td>Establish team standards</td>
+        </tr>
+        <tr>
+            <td>Poor Documentation</td>
+            <td>Low adoption</td>
+            <td>Auto-generate API docs</td>
+        </tr>
+    </table>
+</div>
+
+<div class="slide">
+    <h1>Running the Demo</h1>
+    
+    <h2>1. Build and Run</h2>
+    <div class="code">
+dotnet build
+dotnet run
+    </div>
+    
+    <h2>2. Access Swagger UI</h2>
+    <div class="code">
+https://localhost:7000/swagger
+    </div>
+    
+    <h2>3. Test API Endpoints</h2>
+    <div class="code">
+# URL Path Versioning
+GET /api/v1.0/products
+GET /api/v2.0/products
+
+# Header Versioning
+GET /api/users
+X-Version: 1.0
+
+# Query Parameter
+GET /api/orders/query-version?version=2.0
+    </div>
+</div>
+
+<div class="slide">
+    <h1>Demo Scenarios</h1>
+    
+    <h2>Scenario 1: URL Path Versioning</h2>
+    <ul>
+        <li>Products V1: Basic fields only</li>
+        <li>Products V2: Enhanced with description, dates</li>
+        <li>Show backward compatibility</li>
+    </ul>
+    
+    <h2>Scenario 2: Header Versioning</h2>
+    <ul>
+        <li>Users API with X-Version header</li>
+        <li>V1: Simple string array</li>
+        <li>V2: Objects with ID and email</li>
+    </ul>
+    
+    <h2>Scenario 3: Deprecation in Action</h2>
+    <ul>
+        <li>V1 Products API with deprecation headers</li>
+        <li>Legacy API returning HTTP 410 Gone</li>
+        <li>Monitoring deprecated API usage</li>
+    </ul>
+    
+    <h2>Scenario 4: Query Parameter</h2>
+    <ul>
+        <li>Orders API with version parameter</li>
+        <li>Fallback to default version</li>
+    </ul>
+</div>
+
+<div class="slide">
+    <h1>Key Takeaways</h1>
+    
+    <div class="best-practice">
+        <h2>Remember:</h2>
+        <ul>
+            <li>🎯 <strong>Purpose:</strong> Version for breaking changes only</li>
+            <li>🛣️ <strong>Strategy:</strong> URL path versioning for public APIs</li>
+            <li>📋 <strong>Planning:</strong> Plan version lifecycle from day one</li>
+            <li>📚 <strong>Documentation:</strong> Clear docs and migration guides</li>
+            <li>🔄 <strong>Testing:</strong> Test all supported versions</li>
+            <li>📊 <strong>Monitoring:</strong> Track version usage and performance</li>
+            <li>💬 <strong>Communication:</strong> Announce changes early and clearly</li>
+        </ul>
+    </div>
+</div>
+
+<div class="slide">
+    <h1>Project Structure</h1>
+    
+    <div class="code">
+ApiVersioningDemo/
+├── Controllers/
+│   ├── ProductsV1Controller.cs    # V1.0 Products API (Deprecated)
+│   ├── ProductsV2Controller.cs    # V2.0 Products API
+│   ├── UsersController.cs         # Header versioning
+│   ├── OrdersController.cs        # Query parameter versioning
+│   └── LegacyController.cs        # Deprecated/Removed APIs
+├── Models/
+│   └── Product.cs                 # Product models
+├── Attributes/
+│   └── DeprecatedAttribute.cs     # Custom deprecation attribute
+├── Middleware/
+│   └── DeprecationMiddleware.cs   # Usage tracking
+├── Properties/
+│   └── launchSettings.json        # Launch configuration
+├── ApiVersioningDemo.csproj       # Project file
+├── Program.cs                     # Startup configuration
+└── README.md                      # Documentation
+    </div>
+</div>
+
+<div class="slide">
+    <h1>Troubleshooting Tips</h1>
+    
+    <h2>Common Issues & Solutions</h2>
+    <table>
+        <tr>
+            <th>Issue</th>
+            <th>Solution</th>
+        </tr>
+        <tr>
+            <td>APIs not showing in Swagger</td>
+            <td>Add [ApiVersion] attributes to controllers</td>
+        </tr>
+        <tr>
+            <td>Version not recognized</td>
+            <td>Check ApiVersionReader configuration</td>
+        </tr>
+        <tr>
+            <td>Default version not working</td>
+            <td>Set AssumeDefaultVersionWhenUnspecified = true</td>
+        </tr>
+        <tr>
+            <td>Multiple controllers conflict</td>
+            <td>Use different route templates or controller names</td>
+        </tr>
+    </table>
+    
+    <h2>Verification Steps</h2>
+    <ul>
+        <li>✅ Check package versions compatibility</li>
+        <li>✅ Verify controller attributes</li>
+        <li>✅ Test all versioning methods</li>
+        <li>✅ Validate Swagger documentation</li>
+    </ul>
+</div>
+
+<div class="slide">
+    <h1>Questions & Discussion</h1>
+    
+    <h2>Discussion Topics:</h2>
+    <ul>
+        <li>Which versioning strategy fits your current projects?</li>
+        <li>How do you handle version deprecation?</li>
+        <li>What challenges have you faced with API evolution?</li>
+        <li>How do you communicate API changes to consumers?</li>
+    </ul>
+    
+    <h2>Resources:</h2>
+    <ul>
+        <li>📁 Demo code repository</li>
+        <li>📖 Microsoft API Versioning documentation</li>
+        <li>🔗 REST API versioning best practices</li>
+        <li>🛠️ Swagger/OpenAPI specification</li>
+    </ul>
+    
+    <h1 style="text-align: center; margin-top: 50px;">Thank You!</h1>
+</div>
+
+</body>
+</html>
